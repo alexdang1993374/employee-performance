@@ -17,8 +17,7 @@ const EmployeeTable = () => {
     const fetchData = async () => {
       try {
         const result = await axios.get("http://localhost:5001/employees");
-
-        setEmployees(result.data.data);
+        setEmployees(result.data.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data: ", error);

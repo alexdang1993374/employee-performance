@@ -1,99 +1,121 @@
 package controllers
 
 import (
-	"log"
+	"context"
+	"employeeperformance/config"
+	"employeeperformance/models"
+	"employeeperformance/responses"
 	"math/rand"
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var dbConnect *pg.DB
+// Collection for employees in MongoDB
+var employeeCollection *mongo.Collection = config.GetCollection(config.DB, "employees")
 
-// Initiate the database
-func InitiateDB(db *pg.DB) {
-	dbConnect = db
-}
+// Validator instance for validating employee fields
+var validate = validator.New()
 
-type EmployeePerformance struct {
-	ID        int64      `json:"id"`
-	Name      string    `json:"name"`
-	Performance  int    `json:"performance"`
-	Date      time.Time `json:"Date"`
-}
+// CreateEmployee handles the creation of a new employee in the database
+func CreateEmployee(c *fiber.Ctx) error {
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-func CreateEmployeeTable(db *pg.DB) error {
-	opts := &orm.CreateTableOptions{
-		IfNotExists: true,
+	var employee models.Employee
+
+	// Parse the request body into the employee struct
+	if err := c.BodyParser(&employee); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(
+			responses.EmployeeResponse{
+				Status: http.StatusBadRequest,
+				Message: "Error parsing request body",
+				Data: &fiber.Map{"data": err.Error()},
+			})
 	}
 
-	createError := db.CreateTable(&EmployeePerformance{}, opts)
-
-	if createError != nil {
-		log.Printf("Error while creating employee performance table, Reason: %v\n", createError)
-		return createError
+	// Validate required employee fields
+	if validationErr := validate.Struct(&employee); validationErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(
+			responses.EmployeeResponse{
+				Status: http.StatusBadRequest,
+				Message: "Error in employee data",
+				Data: &fiber.Map{"data": validationErr.Error()},
+			})
 	}
 
-	log.Printf("EmployeePerformance table created")
-
-	return nil
-}
-
-func GetAllEmployees(c *gin.Context) {
-	var employeePerformance []EmployeePerformance
-
-	err := dbConnect.Model(&employeePerformance).Order("performance").Select()
-
-	if err != nil {
-		log.Printf("Error while getting all employees, Reason: %v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  http.StatusInternalServerError,
-			"message": "Something went wrong",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":  http.StatusOK,
-		"message": "All Employees",
-		"data":    employeePerformance,
-	})
-	return
-}
-
-func CreateEmployee(c *gin.Context) {
-	var employeePerformance EmployeePerformance
-	c.BindJSON(&employeePerformance)
-
-	name := employeePerformance.Name
-	performance := employeePerformance.Performance
-
+	// Seed random number generator and create new Employee
 	rand.Seed(time.Now().UnixNano())
-	id := rand.Int63()
-
-	insertError := dbConnect.Insert(&EmployeePerformance{
-		ID:    id,
-		Name:  name,
-		Performance:   performance,
-		Date: time.Now(),
-	})
-
-	if insertError != nil {
-		log.Printf("Error while inserting new employee into db, Reason: %v\n", insertError)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  http.StatusInternalServerError,
-			"message": "Something went wrong",
-		})
-		return
+	newEmployee := models.Employee{
+		Id:         rand.Int63(),
+		Name:       employee.Name,
+		Performance: employee.Performance,
+		Date:       time.Now(),
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"status":  http.StatusCreated,
-		"message": "Employee created Successfully",
-	})
+	// Insert new employee into the database
+	result, err := employeeCollection.InsertOne(ctx, newEmployee)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(
+			responses.EmployeeResponse{
+				Status: http.StatusInternalServerError,
+				Message: "Error inserting employee into database",
+				Data: &fiber.Map{"data": err.Error()},
+			})
+	}
 
-	return
+	// Return success response with created employee data
+	return c.Status(http.StatusCreated).JSON(
+		responses.EmployeeResponse{
+			Status: http.StatusCreated,
+			Message: "Employee successfully created",
+			Data: &fiber.Map{"data": result},
+		})
+}
+
+// GetAllEmployees handles fetching all employees from the database
+func GetAllEmployees(c *fiber.Ctx) error {
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var employees []models.Employee
+
+	// Find all employees in the database
+	results, err := employeeCollection.Find(ctx, bson.M{})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(
+			responses.EmployeeResponse{
+				Status: http.StatusInternalServerError,
+				Message: "Error fetching employees from database",
+				Data: &fiber.Map{"data": err.Error()},
+			})
+	}
+
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singleEmployee models.Employee
+		if err = results.Decode(&singleEmployee); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(
+				responses.EmployeeResponse{
+					Status: http.StatusInternalServerError,
+					Message: "Error decoding employee data",
+					Data: &fiber.Map{"data": err.Error()},
+				})
+		}
+		employees = append(employees, singleEmployee)
+	}
+
+	// Return success response with employees data
+	return c.Status(http.StatusOK).JSON(
+		responses.EmployeeResponse{
+			Status: http.StatusOK,
+			Message: "Successfully fetched employees",
+			Data: &fiber.Map{"data": employees},
+		})
 }

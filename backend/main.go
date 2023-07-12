@@ -1,26 +1,26 @@
 package main
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 
 	"employeeperformance/config"
 	"employeeperformance/routes"
 )
 
 func main() {
-	// Connect to database
-	config.Connect()
-	
-	// Set the router as the default one shipped with Gin
-	router := gin.Default()
+	// Initialize app
+	app := fiber.New()
 
-	// Apply the middleware to the router (use cors.Default() to allow all origins)
-	router.Use(cors.Default())
+	// Add middleware
+	app.Use(cors.New())
+
+	// Connect to database
+	config.ConnectDB()
 
 	// Setup route group for the API
-	routes.Routes(router)
+	routes.EmployeeRoutes(app)
 
 	// Start and run the server
-	router.Run(":5001")
+	app.Listen(":5001")
 }

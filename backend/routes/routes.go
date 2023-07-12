@@ -1,35 +1,16 @@
 package routes
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-
 	"employeeperformance/controllers"
+
+	"github.com/gofiber/fiber/v2"
 )
 
-//Routes for API
-func Routes(router *gin.Engine) {
-	// Get all employees
-	router.GET("/employees", controllers.GetAllEmployees)
+// EmployeeRoutes function sets up the routes for employee operations
+func EmployeeRoutes(app *fiber.App) {
+	// POST request to /employees will create a new employee
+	app.Post("/employees", controllers.CreateEmployee)
 
-	// Create an employee
-	router.POST("/employees", controllers.CreateEmployee)
-
-	// Get a single employee
-	// router.GET("/employees/:employeeID", controllers.GetSingleEmployee)
-
-	// Edit an employee
-	// router.PUT("/employees/:employeeID", controllers.EditEmployee)
-
-	// Delete an employee
-	// router.DELETE("/employees/:employeeID", controllers.DeleteEmployee)
-}
-
-func welcome(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"status":  200,
-		"message": "Welcome To Employee Performance API",
-	})
-	return
+	// GET request to /employees will fetch all employees
+	app.Get("/employees", controllers.GetAllEmployees)
 }
