@@ -4,3 +4,11 @@ export interface IEmployee {
   performance: number;
   date: string;
 }
+
+export interface IEmployeeResponse {
+  data: {
+    data: {
+      data: IEmployee[];
+    };
+  };
+}

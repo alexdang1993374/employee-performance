@@ -8,19 +8,22 @@ import (
 	"employeeperformance/routes"
 )
 
+// Server port
+const ServerPort = ":5001"
+
 func main() {
-	// Initialize app
+	// Initialize Fiber application
 	app := fiber.New()
 
-	// Add middleware
+	// Use CORS middleware to allow Cross-Origin Resource Sharing
 	app.Use(cors.New())
 
-	// Connect to database
+	// Connect to MongoDB database
 	config.ConnectDB()
 
 	// Setup route group for the API
 	routes.EmployeeRoutes(app)
 
-	// Start and run the server
+	// Listen and serve the application on the defined port
 	app.Listen(":5001")
 }

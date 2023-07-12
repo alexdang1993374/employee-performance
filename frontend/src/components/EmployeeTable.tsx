@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-import { IEmployee } from "@/types";
+import { IEmployee, IEmployeeResponse } from "@/types";
 
 const EmployeeTable = () => {
   const [employees, setEmployees] = useState<IEmployee[]>([]);
@@ -16,7 +16,10 @@ const EmployeeTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await axios.get("http://localhost:5001/employees");
+        const result: IEmployeeResponse = await axios.get(
+          "http://localhost:5001/employees"
+        );
+
         setEmployees(result.data.data.data);
         setLoading(false);
       } catch (error) {
@@ -28,9 +31,9 @@ const EmployeeTable = () => {
     fetchData();
   }, []);
 
-  //   if (loading) {
-  //     return <Spinner color="primary" />;
-  //   }
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return <div>Employee table</div>;
 };
