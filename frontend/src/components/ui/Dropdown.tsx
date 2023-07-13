@@ -63,7 +63,7 @@ const Dropdown: React.FC<DropdownProps> = ({ buttonLabel, menuItems }) => {
       onMouseLeave={handleMouseLeave}
     >
       <button
-        className={`w-[150px] flex justify-center items-center bg-gray-500 text-white px-3 py-2 rounded-full text-sm ${
+        className={`w-[180px] flex justify-center items-center bg-gray-500 text-white px-3 py-2 rounded-full text-sm ${
           isOpen ? "opacity-70" : "opacity-100"
         }`}
         onClick={handleClick}
@@ -74,7 +74,7 @@ const Dropdown: React.FC<DropdownProps> = ({ buttonLabel, menuItems }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="absolute bg-gray-200 rounded text-center shadow-xl overflow-hidden z-10 w-[150px]"
+            className="absolute bg-gray-200 rounded text-center shadow-xl overflow-hidden z-10 w-[180px]"
             initial={{ height: 0 }}
             animate={{ height: "auto" }}
             exit={{ height: 0 }}

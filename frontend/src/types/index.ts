@@ -18,4 +18,8 @@ export interface MenuItem {
   onClick: VoidFunction;
 }
 
-export type SortOptions = "Name" | "Performance" | "Date";
+export type SortOptions =
+  | "Name"
+  | "Performance H->L"
+  | "Performance L->H"
+  | "Date";

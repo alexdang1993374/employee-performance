@@ -11,19 +11,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDate } from "@/helpers";
+import { formatDate, sortEmployees } from "@/helpers";
 import { IEmployee, IEmployeeResponse, MenuItem, SortOptions } from "@/types";
 import Dropdown from "./ui/Dropdown";
 
 const EmployeeTable = () => {
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [currentSort, setCurrentSort] = useState<SortOptions>("Performance");
+  const [currentSort, setCurrentSort] =
+    useState<SortOptions>("Performance H->L");
 
   const sortOptions: MenuItem[] = [
     {
-      label: "Performance",
-      onClick: () => setCurrentSort("Performance"),
+      label: "Performance H->L",
+      onClick: () => setCurrentSort("Performance H->L"),
+    },
+    {
+      label: "Performance L->H",
+      onClick: () => setCurrentSort("Performance L->H"),
     },
     {
       label: "Name",
@@ -42,7 +47,7 @@ const EmployeeTable = () => {
           "http://localhost:5001/employees"
         );
 
-        setEmployees(result.data.data.data);
+        setEmployees(sortEmployees(result.data.data.data, "Performance H->L"));
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data: ", error);
@@ -53,12 +58,14 @@ const EmployeeTable = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    setEmployees(sortEmployees(employees, currentSort));
+  }, [currentSort]);
+
   return (
     <>
-      <div className="mb-4 flex gap-8 items-center">
-        <p>Employee Table</p>
-
-        <p>|</p>
+      <div className="mb-4 flex flex-col gap-4 items-center">
+        <p className="text-lg">Employee Table</p>
 
         <div className="flex gap-2 items-center">
           <p>Sort by</p>

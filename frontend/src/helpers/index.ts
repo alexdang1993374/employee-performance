@@ -1,3 +1,5 @@
+import { IEmployee, SortOptions } from "@/types";
+
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
 
@@ -6,4 +8,28 @@ export const formatDate = (dateString: string): string => {
   const year = date.getFullYear();
 
   return `${month}/${day}/${year}`;
+};
+
+export const sortEmployees = (
+  employees: IEmployee[],
+  sortOption: SortOptions
+): IEmployee[] => {
+  const sortedEmployees = [...employees];
+
+  sortedEmployees.sort((a, b) => {
+    switch (sortOption) {
+      case "Name":
+        return a.name.localeCompare(b.name);
+      case "Performance H->L":
+        return b.performance - a.performance;
+      case "Performance L->H":
+        return a.performance - b.performance;
+      case "Date":
+        return new Date(a.Date).getTime() - new Date(b.Date).getTime();
+      default:
+        return 0;
+    }
+  });
+
+  return sortedEmployees;
 };
