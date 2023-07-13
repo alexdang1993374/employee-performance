@@ -41,25 +41,38 @@ const EmployeeTable = () => {
   ];
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchData = async () => {
       try {
         const result: IEmployeeResponse = await axios.get(
           "http://localhost:5001/employees"
         );
 
-        setEmployees(sortEmployees(result.data.data.data, "Performance H->L"));
-        setLoading(false);
+        if (isMounted) {
+          setEmployees(
+            sortEmployees(result.data.data.data, "Performance H->L")
+          );
+          setLoading(false);
+        }
       } catch (error) {
         console.error("Error fetching data: ", error);
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
     setEmployees(sortEmployees(employees, currentSort));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSort]);
 
   return (
