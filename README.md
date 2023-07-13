@@ -73,10 +73,6 @@ The following technologies were used in this project:
 
     The server should be running on [http://localhost:5001](http://localhost:5001)
 
-    ```
-
-    ```
-
 4.  **Setup the frontend**
 
     Open a new terminal and navigate to the frontend directory, install the dependencies and start the server.
