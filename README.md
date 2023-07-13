@@ -67,13 +67,13 @@ The following technologies were used in this project:
 
     Start the server
 
-        ```sh
-
+    ```sh
     go run main.go
-
     ```
 
     The server should be running on [http://localhost:5001](http://localhost:5001)
+
+    ```
 
     ```
 
