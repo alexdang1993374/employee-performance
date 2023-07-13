@@ -53,7 +53,6 @@ The following technologies were used in this project:
     In the backend directory, create a .env file with the MongoDB URI:
 
     ```sh
-    cd backend
     touch .env
     ```
 
