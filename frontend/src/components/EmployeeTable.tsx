@@ -12,11 +12,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/helpers";
-import { IEmployee, IEmployeeResponse } from "@/types";
+import { IEmployee, IEmployeeResponse, MenuItem, SortOptions } from "@/types";
+import Dropdown from "./ui/Dropdown";
 
 const EmployeeTable = () => {
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [currentSort, setCurrentSort] = useState<SortOptions>("Performance");
+
+  const sortOptions: MenuItem[] = [
+    {
+      label: "Performance",
+      onClick: () => setCurrentSort("Performance"),
+    },
+    {
+      label: "Name",
+      onClick: () => setCurrentSort("Name"),
+    },
+    {
+      label: "Date",
+      onClick: () => setCurrentSort("Date"),
+    },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,8 +55,16 @@ const EmployeeTable = () => {
 
   return (
     <>
-      <div className="mb-4">
+      <div className="mb-4 flex gap-8 items-center">
         <p>Employee Table</p>
+
+        <p>|</p>
+
+        <div className="flex gap-2 items-center">
+          <p>Sort by</p>
+
+          <Dropdown menuItems={sortOptions} buttonLabel={currentSort} />
+        </div>
       </div>
 
       {loading ? (

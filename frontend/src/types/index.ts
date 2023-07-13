@@ -12,3 +12,10 @@ export interface IEmployeeResponse {
     };
   };
 }
+
+export interface MenuItem {
+  label: string;
+  onClick: VoidFunction;
+}
+
+export type SortOptions = "Name" | "Performance" | "Date";
