@@ -41,7 +41,7 @@ The following technologies were used in this project:
 
     3. **Setup the backend**
 
-    Navigate to the backend directory, install the dependencies and start the server.
+    Open a terminal, navigate to the backend directory, and install the dependencies.
 
     ```sh
     cd backend
