@@ -1,4 +1,4 @@
-# Employee Dashboard Project
+# EightVape Employee Dashboard
 
 This project is an employee dashboard developed using the Go programming language for the REST API and MongoDB for database connectivity. The front-end interface is built using React and NextJS.
 
